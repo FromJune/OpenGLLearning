@@ -7,4 +7,8 @@
   <ItemGroup>
     <ClInclude Include="MyGlWindow.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="VertexShaderCode.glsl" />
+    <None Include="FragmentShaderCode.glsl" />
+  </ItemGroup>
 </Project>
