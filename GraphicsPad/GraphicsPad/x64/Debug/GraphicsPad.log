@@ -1,0 +1,5 @@
+﻿  Mainer.cpp
+C:\Users\yaoyu\OneDrive\study\openGL\OpenGLLearning\GraphicsPad\GraphicsPad\Mainer.cpp(1,10): fatal error C1083: Cannot open include file: 'Qt\qapplication.h': No such file or directory
+  MyGlWindow.cpp
+C:\Users\yaoyu\OneDrive\study\openGL\OpenGLLearning\GraphicsPad\GraphicsPad\MyGlWindow.cpp(1,10): fatal error C1083: Cannot open include file: 'gl\glew.h': No such file or directory
+  Generating Code...
