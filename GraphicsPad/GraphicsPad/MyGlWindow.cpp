@@ -11,19 +11,197 @@ const float SIZE_PER_TRI = NUM_VERTRICES_PER_TRI * NUM_FLOATS_PER_VERTICE * size
 uint numTri = 0;
 const uint MAX_TRI_NUM = 20;
 
+GLuint vao1ID;
+GLuint vao2ID;
+GLuint vao3ID;
+
 
 void sendDataToOpenGL()
 {
+	GLfloat vertices1[] =
+	{
+		-1.0f, 1.0f, 0.5f,
+		0.8f, 0.8f, 0.8f,
+		1.0f, 1.0f, 0.5f,
+		0.8f, 0.8f, 0.8f,
+		-1.0f, -1.0f, 0.5f,
+		0.8f, 0.8f, 0.8f,
+		1.0f, -1.0f, 0.5f,
+		0.8f, 0.8f, 0.8f,
+	};
+	GLfloat vertices2[] =
+	{
+		-1.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+		-0.5f, 0.0f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+		-1.0f, 0.3f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+
+		-0.5f, 0.7f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+		0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+
+		0.5f, 0.0f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+		0.0f, 0.3f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+
+		0.5f, 0.7f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+		1.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+
+		1.0f, -1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+		0.5f, -0.7f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+
+		0.0f, -1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+		0.0f, -0.3f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+
+		-0.5f, -0.7f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+		-1.0f, -1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+		-1.0f, -0.3f, 0.0f,
+		0.5f, 0.5f, 0.5f,
+	};
+	GLfloat vertices3[] =
+	{
+		-1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+		-0.5f, 0.0f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 0.3f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+
+		-0.5f, 0.7f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+		0.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+
+		0.5f, 0.0f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+		0.0f, 0.3f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+
+		0.5f, 0.7f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+
+		1.0f, -1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+		0.5f, -0.7f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+
+		0.0f, -1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+		0.0f, -0.3f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+
+		-0.5f, -0.7f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, -0.3f, 0.0f,
+		1.0f, 1.0f, 1.0f,
+	};
+
+	GLushort indices1[] =
+	{
+		0,1,2,
+		1,3,2,
+	};
+
+	GLushort indices2[] =
+	{
+		0,1,2,
+		1,3,4,
+		4,5,6,
+		5,7,8,
+		5,9,10,
+		5,11,12,
+		1,11,13,
+		1,14,15,
+	};
+
+	GLushort indices3[] =
+	{
+		0,3,1,
+		1,4,6,
+		4,7,5,
+		5,8,2,
+		5,15,9,
+		5,10,11,
+		1,12,11,
+		1,13,14
+
+	};
+
+	
+	glGenVertexArrays(1, &vao1ID);
+	glBindVertexArray(vao1ID);
 
 	GLuint vertexBufferID;
+	GLuint elementBufferID;
 	glGenBuffers(1, &vertexBufferID);
+	glGenBuffers(1, &elementBufferID);
+
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER, 20 * SIZE_PER_TRI, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices1), indices1, GL_STATIC_DRAW);
+
+
+	glGenVertexArrays(1, &vao2ID);
+	glBindVertexArray(vao2ID);
+
+	GLuint vertexBuffer2ID;
+	glGenBuffers(1, &vertexBuffer2ID);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer2ID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
+
+	
+	GLuint elementBuffer2ID;
+	glGenBuffers(1, &elementBuffer2ID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer2ID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2), indices2, GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &vao3ID);
+	glBindVertexArray(vao3ID);
+
+	GLuint vertexBuffer3ID;
+	glGenBuffers(1, &vertexBuffer3ID);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer3ID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices3), vertices3, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
+
+
+	GLuint elementBuffer3ID;
+	glGenBuffers(1, &elementBuffer3ID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer3ID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices3), indices3, GL_STATIC_DRAW);
+
 
 }
 
@@ -159,6 +337,12 @@ void MyGlWindow::paintGL()
 {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
-	sendTriangleToOpenGL();
-	glDrawArrays(GL_TRIANGLES, (numTri - 1) * NUM_VERTRICES_PER_TRI, NUM_VERTRICES_PER_TRI);
+	//sendTriangleToOpenGL();
+	glBindVertexArray(vao1ID);
+	//glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+	glBindVertexArray(vao2ID);
+	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 0);
+	glBindVertexArray(vao3ID);
+	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 0);
 }
