@@ -1,8 +1,11 @@
 #include <gl\glew.h>
 #include <iostream>
 #include <fstream>
+#include <glm\glm.hpp>
 #include "MyGlWindow.h"
+
 using namespace std;
+using glm::vec3;
 
 const uint NUM_VERTRICES_PER_TRI = 3;
 const uint NUM_FLOATS_PER_VERTICE = 6;
@@ -11,9 +14,13 @@ const float SIZE_PER_TRI = NUM_VERTRICES_PER_TRI * NUM_FLOATS_PER_VERTICE * size
 uint numTri = 0;
 const uint MAX_TRI_NUM = 20;
 
+
 GLuint vao1ID;
 GLuint vao2ID;
 GLuint vao3ID;
+
+GLuint programID;
+
 
 
 void sendDataToOpenGL()
@@ -24,10 +31,19 @@ void sendDataToOpenGL()
 		0.8f, 0.8f, 0.8f,
 		1.0f, 1.0f, 0.5f,
 		0.8f, 0.8f, 0.8f,
+		-1.0f, 0.0f, 0.5f,
+		0.8f, 0.8f, 0.8f,
+		1.0f, 0.0f, 0.5f,
+		0.8f, 0.8f, 0.8f,
+
+		-1.0f, 0.0f, 0.5f,
+		0.7f, 0.7f, 0.7f,
+		1.0f, 0.0f, 0.5f,
+		0.7f, 0.7f, 0.7f,
 		-1.0f, -1.0f, 0.5f,
-		0.8f, 0.8f, 0.8f,
+		0.7f, 0.7f, 0.7f,
 		1.0f, -1.0f, 0.5f,
-		0.8f, 0.8f, 0.8f,
+		0.7f, 0.7f, 0.7f,
 	};
 	GLfloat vertices2[] =
 	{
@@ -43,32 +59,6 @@ void sendDataToOpenGL()
 		0.0f, 1.0f, 0.0f,
 		0.5f, 0.5f, 0.5f,
 
-		0.5f, 0.0f, 0.0f,
-		0.5f, 0.5f, 0.5f,
-		0.0f, 0.3f, 0.0f,
-		0.5f, 0.5f, 0.5f,
-
-		0.5f, 0.7f, 0.0f,
-		0.5f, 0.5f, 0.5f,
-		1.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f,
-
-		1.0f, -1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f,
-		0.5f, -0.7f, 0.0f,
-		0.5f, 0.5f, 0.5f,
-
-		0.0f, -1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f,
-		0.0f, -0.3f, 0.0f,
-		0.5f, 0.5f, 0.5f,
-
-		-0.5f, -0.7f, 0.0f,
-		0.5f, 0.5f, 0.5f,
-		-1.0f, -1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f,
-		-1.0f, -0.3f, 0.0f,
-		0.5f, 0.5f, 0.5f,
 	};
 	GLfloat vertices3[] =
 	{
@@ -76,70 +66,37 @@ void sendDataToOpenGL()
 		1.0f, 1.0f, 1.0f,
 		-0.5f, 0.0f, 0.0f,
 		1.0f, 1.0f, 1.0f,
-		1.0f, 0.3f, 0.0f,
+		-0.5f, 0.7f, 0.0f,
 		1.0f, 1.0f, 1.0f,
 
-		-0.5f, 0.7f, 0.0f,
+		0.0f, 0.3f, 0.0f,
 		1.0f, 1.0f, 1.0f,
 		0.0f, 1.0f, 0.0f,
 		1.0f, 1.0f, 1.0f,
 
-		0.5f, 0.0f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-		0.0f, 0.3f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-
-		0.5f, 0.7f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-
-		1.0f, -1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-		0.5f, -0.7f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-
-		0.0f, -1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-		0.0f, -0.3f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-
-		-0.5f, -0.7f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, -1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, -0.3f, 0.0f,
-		1.0f, 1.0f, 1.0f,
 	};
 
 	GLushort indices1[] =
 	{
 		0,1,2,
 		1,3,2,
+
+		4,5,6,
+		5,7,6,
 	};
 
 	GLushort indices2[] =
 	{
 		0,1,2,
 		1,3,4,
-		4,5,6,
-		5,7,8,
-		5,9,10,
-		5,11,12,
-		1,11,13,
-		1,14,15,
+
 	};
 
 	GLushort indices3[] =
 	{
-		0,3,1,
-		1,4,6,
-		4,7,5,
-		5,8,2,
-		5,15,9,
-		5,10,11,
-		1,12,11,
-		1,13,14
+		0,2,1,
+		1,4,3,
+
 
 	};
 
@@ -288,7 +245,7 @@ void installShaders()
 	if(! checkShaderStatus(vertexShaderID) || ! checkShaderStatus(fragmentShaderID))
 		return;
 
-	GLuint programID = glCreateProgram();
+	programID = glCreateProgram();
 	glAttachShader(programID, vertexShaderID);
 	glAttachShader(programID, fragmentShaderID);
 	glLinkProgram(programID);
@@ -338,11 +295,47 @@ void MyGlWindow::paintGL()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
 	//sendTriangleToOpenGL();
+	vec3 triOffset(0.0f, 0.0f, 0.0f);
+	float xScale = 0.25f;
+
+	GLuint triOffsetUniformPos = glGetUniformLocation(programID, "triOffset");
+	GLuint yScaleUniformPos = glGetUniformLocation(programID, "yScale");
+	GLuint xScaleUniformPos = glGetUniformLocation(programID, "xScale");
+	
+	//offset(0,0,0) yScale 1
+	glUniform3fv(triOffsetUniformPos, 1, &triOffset[0]);
+	glUniform1f(yScaleUniformPos, 1.0f);
+	glUniform1f(xScaleUniformPos, 1.0f);
+
 	glBindVertexArray(vao1ID);
 	//glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-	glBindVertexArray(vao2ID);
-	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 0);
-	glBindVertexArray(vao3ID);
-	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_SHORT, 0);
+
+	glUniform1f(xScaleUniformPos, xScale);
+
+	float tri_x;
+	float tri_y_scale;
+
+	for(int i = 0; i < 1 / xScale * 2; i++)
+	{
+		for (float j = 0; j < 2; j++)
+		{
+			tri_x =  i - 1.0f * (1.0f / xScale - 1.0f);
+			tri_y_scale = -1.0f + j * 2;
+			triOffset.r = tri_x;
+			glUniform3fv(triOffsetUniformPos, 1, &triOffset[0]);
+			glUniform1f(yScaleUniformPos, tri_y_scale);
+			
+
+			glBindVertexArray(vao2ID);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+			glBindVertexArray(vao3ID);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+			
+		}
+	}
+
+
+
 }
