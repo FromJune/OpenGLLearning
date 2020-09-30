@@ -12,10 +12,14 @@ uint numTri = 0;
 const uint MAX_TRI_NUM = 20;
 
 
+
+QTimer myTimer;
+
 void sendDataToOpenGL()
 {
 
 	GLuint vertexBufferID;
+	
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 	glBufferData(GL_ARRAY_BUFFER, 20 * SIZE_PER_TRI, NULL, GL_STATIC_DRAW);
@@ -24,6 +28,9 @@ void sendDataToOpenGL()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
+
+	
+
 
 }
 
@@ -123,11 +130,14 @@ void installShaders()
 
 void MyGlWindow::initializeGL()
 {
+	
+
 	glewInit();
 
 	glEnable(GL_DEPTH_TEST);
 
-	sendDataToOpenGL();
+	connect(&myTimer, SIGNAL(timeout()), this, SLOT(myUpdate()));
+	myTimer.start(100);
 
 	installShaders();
 }
@@ -161,4 +171,12 @@ void MyGlWindow::paintGL()
 	glViewport(0, 0, width(), height());
 	sendTriangleToOpenGL();
 	glDrawArrays(GL_TRIANGLES, (numTri - 1) * NUM_VERTRICES_PER_TRI, NUM_VERTRICES_PER_TRI);
+}
+
+void MyGlWindow::myUpdate()
+{
+	//cout << "frame!" << endl;
+	
+	sendDataToOpenGL();
+	repaint();
 }
