@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Mainer.cpp" />
+    <ClCompile Include="moc_MyGlWindow.cpp" />
     <ClCompile Include="MyGlWindow.cpp" />
   </ItemGroup>
   <ItemGroup>

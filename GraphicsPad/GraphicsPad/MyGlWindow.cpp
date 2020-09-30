@@ -13,6 +13,7 @@ const float DELTA_X = 0.1f;
 const float SIZE_PER_TRI = NUM_VERTRICES_PER_TRI * NUM_FLOATS_PER_VERTICE * sizeof(float);
 uint numTri = 0;
 const uint MAX_TRI_NUM = 20;
+vec3 triOffset(0.0f, 0.0f, 0.0f);
 
 
 GLuint vao1ID;
@@ -262,9 +263,13 @@ void MyGlWindow::initializeGL()
 
 	glEnable(GL_DEPTH_TEST);
 
+	connect(&myTimer, SIGNAL(timeout()), this, SLOT(myUpdate()));
+	myTimer.start(100);
+
 	sendDataToOpenGL();
 
 	installShaders();
+
 }
 
 void sendTriangleToOpenGL()
@@ -295,9 +300,8 @@ void MyGlWindow::paintGL()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
 	//sendTriangleToOpenGL();
-	vec3 triOffset(0.0f, 0.0f, 0.0f);
-	float xScale = 0.25f;
-
+	
+	
 	GLuint triOffsetUniformPos = glGetUniformLocation(programID, "triOffset");
 	GLuint yScaleUniformPos = glGetUniformLocation(programID, "yScale");
 	GLuint xScaleUniformPos = glGetUniformLocation(programID, "xScale");
@@ -309,33 +313,21 @@ void MyGlWindow::paintGL()
 
 	glBindVertexArray(vao1ID);
 	//glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_SHORT, 0);;
 
-	glUniform1f(xScaleUniformPos, xScale);
+	glBindVertexArray(vao2ID);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
-	float tri_x;
-	float tri_y_scale;
+	glBindVertexArray(vao3ID);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
-	for(int i = 0; i < 1 / xScale * 2; i++)
-	{
-		for (float j = 0; j < 2; j++)
-		{
-			tri_x =  i - 1.0f * (1.0f / xScale - 1.0f);
-			tri_y_scale = -1.0f + j * 2;
-			triOffset.r = tri_x;
-			glUniform3fv(triOffsetUniformPos, 1, &triOffset[0]);
-			glUniform1f(yScaleUniformPos, tri_y_scale);
-			
+	
 
-			glBindVertexArray(vao2ID);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+}
 
-			glBindVertexArray(vao3ID);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-			
-		}
-	}
-
-
-
+void MyGlWindow::myUpdate()
+{
+	//cout << "frame!" << endl;
+	triOffset += (0.1f, 0.0f, 0.0f);
+	repaint();
 }
