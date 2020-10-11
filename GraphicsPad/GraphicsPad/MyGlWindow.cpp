@@ -1,17 +1,34 @@
 #include <gl\glew.h>
 #include <iostream>
 #include <fstream>
+#include <stdlib.h>
+#include <time.h>
+#include <glm\glm.hpp>
 #include "MyGlWindow.h"
+
 using namespace std;
+using glm::vec3;
 
 const uint NUM_VERTRICES_PER_TRI = 3;
 const uint NUM_FLOATS_PER_VERTICE = 6;
+GLuint triOffsetUniformPos;
+
 const float DELTA_X = 0.1f;
+const float DELTA_Y = 0.1f;
+const int max_speed = 20;
+const int min_speed = -20;
+
 const float SIZE_PER_TRI = NUM_VERTRICES_PER_TRI * NUM_FLOATS_PER_VERTICE * sizeof(float);
 uint numTri = 0;
-const uint MAX_TRI_NUM = 20;
+//const uint MAX_TRI_NUM = 20;
+vec3 triOffset(0.0f, 0.0f, 0.0f);
 
 
+float rand_x = -(rand() % (max_speed - min_speed) + min_speed) / 10000.0f;
+float rand_y = (rand() % (max_speed - min_speed) + min_speed) / 10000.0f;
+vec3 rand_offset(rand_x, rand_y, 0.0f);
+
+GLuint programID;
 
 QTimer myTimer;
 
@@ -19,16 +36,32 @@ void sendDataToOpenGL()
 {
 
 	GLuint vertexBufferID;
+
+	GLfloat thisTri[] =
+	{
+		0.0f, DELTA_Y, DELTA_Y,
+		1.0f, 0.0f, 0.0f,
+
+		DELTA_X, DELTA_Y, DELTA_Y,
+		1.0f, 0.0f, 0.0f,
+
+		0.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+	};
+
+	
 	
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER, 20 * SIZE_PER_TRI, NULL, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, 100000 * SIZE_PER_TRI, NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, numTri * SIZE_PER_TRI, SIZE_PER_TRI, thisTri);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
 
+	
 	
 
 
@@ -117,7 +150,7 @@ void installShaders()
 	if(! checkShaderStatus(vertexShaderID) || ! checkShaderStatus(fragmentShaderID))
 		return;
 
-	GLuint programID = glCreateProgram();
+	programID = glCreateProgram();
 	glAttachShader(programID, vertexShaderID);
 	glAttachShader(programID, fragmentShaderID);
 	glLinkProgram(programID);
@@ -130,53 +163,75 @@ void installShaders()
 
 void MyGlWindow::initializeGL()
 {
-	
+	srand(time(0));
 
 	glewInit();
 
 	glEnable(GL_DEPTH_TEST);
 
-	connect(&myTimer, SIGNAL(timeout()), this, SLOT(myUpdate()));
-	myTimer.start(100);
+
+	sendDataToOpenGL();
 
 	installShaders();
-}
 
-void sendTriangleToOpenGL()
-{
-	if (numTri == MAX_TRI_NUM)
-		return;
+	triOffsetUniformPos = glGetUniformLocation(programID, "triOffset");
 
-	const GLfloat THIS_TRI_X = -1.0f + numTri * DELTA_X;
 
-	GLfloat thisTri[] = 
-	{ 
-		THIS_TRI_X, 1.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
+	connect(&myTimer, SIGNAL(timeout()), this, SLOT(myUpdate()));
+	myTimer.start(0);
 
-		THIS_TRI_X + DELTA_X, 1.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
+	
 
-		THIS_TRI_X, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-	};
-
-	glBufferSubData(GL_ARRAY_BUFFER, numTri * SIZE_PER_TRI, SIZE_PER_TRI, thisTri);
-	numTri++;
+	
 }
 
 void MyGlWindow::paintGL()
 {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
-	sendTriangleToOpenGL();
+
+	glUniform3fv(triOffsetUniformPos, 1, &triOffset[0]);
 	glDrawArrays(GL_TRIANGLES, (numTri - 1) * NUM_VERTRICES_PER_TRI, NUM_VERTRICES_PER_TRI);
+}
+
+float rand_speed()
+{
+	return abs((rand() % (max_speed - min_speed) + min_speed) / 10000.0f);
+}
+
+float rand_speed_any_direction()
+{
+	return (rand() % (max_speed - min_speed) + min_speed) / 10000.0f;
 }
 
 void MyGlWindow::myUpdate()
 {
-	//cout << "frame!" << endl;
+	triOffset += rand_offset;
 	
-	sendDataToOpenGL();
+
+	//cout << rand_x << "__" << rand_y << endl;
+	if (triOffset[0] + DELTA_X >= 1.0f)
+	{
+		rand_offset[0] = -rand_speed();
+		rand_offset[1] = rand_speed_any_direction();
+
+	}
+	if (triOffset[0] <= -1.0f)
+	{
+		rand_offset[0] = rand_speed();
+		rand_offset[1] = rand_speed_any_direction();
+	}
+	if (triOffset[1] + DELTA_Y >= 1.0f)
+	{
+		rand_offset[0] = rand_speed_any_direction();
+		rand_offset[1] = -rand_speed();
+		cout << rand_offset[1] << endl;
+	}
+	if (triOffset[1] <= -1.0f)
+	{
+		rand_offset[0] = rand_speed_any_direction();
+		rand_offset[1] = rand_speed();
+	}
+
 	repaint();
 }
