@@ -53,16 +53,13 @@ void sendDataToOpenGL()
 	
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	//glBufferData(GL_ARRAY_BUFFER, 100000 * SIZE_PER_TRI, NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, numTri * SIZE_PER_TRI, SIZE_PER_TRI, thisTri);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(thisTri), thisTri,GL_STATIC_DRAW);
+	//glBufferSubData(GL_ARRAY_BUFFER, SIZE_PER_TRI, SIZE_PER_TRI, thisTri);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
-
-	
-	
 
 
 }
@@ -169,18 +166,14 @@ void MyGlWindow::initializeGL()
 
 	glEnable(GL_DEPTH_TEST);
 
-
 	sendDataToOpenGL();
 
 	installShaders();
 
 	triOffsetUniformPos = glGetUniformLocation(programID, "triOffset");
 
-
 	connect(&myTimer, SIGNAL(timeout()), this, SLOT(myUpdate()));
 	myTimer.start(0);
-
-	
 
 	
 }
@@ -189,9 +182,8 @@ void MyGlWindow::paintGL()
 {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
-
 	glUniform3fv(triOffsetUniformPos, 1, &triOffset[0]);
-	glDrawArrays(GL_TRIANGLES, (numTri - 1) * NUM_VERTRICES_PER_TRI, NUM_VERTRICES_PER_TRI);
+	glDrawArrays(GL_TRIANGLES, 0, NUM_VERTRICES_PER_TRI);
 }
 
 float rand_speed()
